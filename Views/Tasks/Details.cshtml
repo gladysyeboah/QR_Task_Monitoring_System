@@ -1,0 +1,145 @@
+@model QR_Field_Monitoring_System.Models.FieldTask
+@{
+    ViewData["Title"] = "Task Details";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0 text-dark fw-bold">Task Details</h1>
+        <p class="text-muted mb-0">Detailed view of task status, assignment, and history.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-mono-outline" asp-action="Index">
+            <i class="bi bi-arrow-left me-2"></i> Back
+        </a>
+        <a class="btn btn-mono" asp-action="Edit" asp-route-id="@Model.Id">
+            <i class="bi bi-pencil me-2"></i> Edit Task
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Main Task details -->
+    <div class="col-12 col-lg-8">
+        <div class="card-mono mb-4">
+            <div class="d-flex justify-content-between align-items-start mb-3 border-bottom pb-2">
+                <div>
+                    <span class="text-muted small">Task ID: #@Model.Id</span>
+                    <h4 class="fw-bold text-dark mt-1">@Model.Title</h4>
+                </div>
+                <div class="d-flex gap-2">
+                    <span class="badge bg-dark text-white">@Model.Priority Priority</span>
+                    <span class="badge-mono">@Model.Status</span>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h6 class="fw-bold text-dark small mb-1">Description</h6>
+                <p class="text-muted" style="white-space: pre-wrap;">@Model.Description</p>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-6 col-md-3">
+                    <span class="d-block text-muted small">Asset Name</span>
+                    <span class="fw-bold text-dark">@Model.AssetName</span>
+                </div>
+                <div class="col-6 col-md-3">
+                    <span class="d-block text-muted small">Location / Site</span>
+                    <span class="fw-bold text-dark">@Model.Location</span>
+                </div>
+                <div class="col-6 col-md-3">
+                    <span class="d-block text-muted small">Created On</span>
+                    <span class="text-muted small">@Model.CreatedAt.ToString("g")</span>
+                </div>
+                <div class="col-6 col-md-3">
+                    <span class="d-block text-muted small">Due Date</span>
+                    <span class="text-muted small fw-bold">@Model.DueDate.ToString("g")</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Submissions History -->
+        <div class="card-mono">
+            <h5 class="fw-bold text-dark mb-3">Submission History</h5>
+            @if (!Model.Submissions.Any())
+            {
+                <p class="text-muted small mb-0">No reports have been submitted for this task yet.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-mono table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Submission ID</th>
+                                <th>Worker</th>
+                                <th>Condition</th>
+                                <th>Submitted On</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var sub in Model.Submissions)
+                            {
+                                <tr>
+                                    <td>#@sub.Id</td>
+                                    <td>@sub.WorkerId</td>
+                                    <td>
+                                        <span class="badge-mono">@sub.Condition</span>
+                                    </td>
+                                    <td class="text-muted small">@sub.SubmittedAt.ToString("g")</td>
+                                    <td class="text-end">
+                                        <a class="btn btn-sm btn-mono-outline" asp-controller="Reports" asp-action="Details" asp-route-id="@sub.Id">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- QR Code & Assignment Info -->
+    <div class="col-12 col-lg-4">
+        <!-- Assigned Worker Card -->
+        <div class="card-mono mb-4">
+            <h5 class="fw-bold text-dark mb-3">Assigned Worker</h5>
+            @if (Model.AssignedWorker != null)
+            {
+                <div class="d-flex align-items-center">
+                    <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
+                        <i class="bi bi-person fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 fw-bold text-dark">@(string.IsNullOrWhiteSpace(Model.AssignedWorker.FullName) ? Model.AssignedWorker.UserName : Model.AssignedWorker.FullName)</h6>
+                        <small class="text-muted">@Model.AssignedWorker.Email</small>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="text-muted small d-flex align-items-center">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    No worker assigned to this task yet.
+                </div>
+            }
+        </div>
+
+        <!-- QR Code Card -->
+        <div class="card-mono text-center">
+            <h5 class="fw-bold text-dark mb-3 text-start">Task QR Code</h5>
+            
+            <!-- Placeholder for Phase 6 QR Generator -->
+            <div class="border border-dashed rounded py-5 px-3 bg-light d-flex flex-column align-items-center justify-content-center">
+                <i class="bi bi-qr-code fs-1 text-muted mb-2"></i>
+                <span class="fw-medium text-dark small">QR Code Placeholder</span>
+                <p class="text-muted mb-0 small mt-1" style="font-size: 0.75rem;">
+                    Automatic QR code generation is scheduled for **Phase 6**.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

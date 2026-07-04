@@ -1,3 +1,4 @@
+@model IEnumerable<QR_Field_Monitoring_System.Models.FieldTask>
 @{
     ViewData["Title"] = "Tasks Management";
 }
@@ -8,46 +9,64 @@
         <p class="text-muted mb-0">Create, assign, and track field monitoring tasks.</p>
     </div>
     <div>
-        <button class="btn btn-mono">
+        <a class="btn btn-mono" asp-action="Create">
             <i class="bi bi-plus-lg me-2"></i> Create New Task
-        </button>
+        </a>
     </div>
 </div>
 
 <!-- Search & Filter Panel -->
 <div class="card-mono mb-4">
-    <div class="row g-3">
+    <form method="get" asp-action="Index" class="row g-3">
         <div class="col-12 col-md-5">
             <label class="form-label small fw-bold text-dark">Search Tasks</label>
             <div class="input-group">
                 <span class="input-group-text bg-light border-end-0 text-muted" style="border: 1px solid var(--border-color);"><i class="bi bi-search"></i></span>
-                <input type="text" class="form-control-mono ps-2 border-start-0" placeholder="Search by name, code or worker..." />
+                <input type="text" name="search" class="form-control-mono ps-2 border-start-0" placeholder="Search by title, description, asset, location..." value="@ViewData["Search"]" />
             </div>
         </div>
         <div class="col-12 col-sm-6 col-md-3">
             <label class="form-label small fw-bold text-dark">Status</label>
-            <select class="form-control-mono">
+            <select name="status" class="form-control-mono" onchange="this.form.submit()">
                 <option value="">All Statuses</option>
-                <option value="pending">Pending</option>
-                <option value="in-progress">In Progress</option>
-                <option value="completed">Completed</option>
+                @foreach (var val in Enum.GetValues(typeof(QR_Field_Monitoring_System.Models.Enums.FieldTaskStatus)))
+                {
+                    var isSelected = (QR_Field_Monitoring_System.Models.Enums.FieldTaskStatus?)ViewData["StatusFilter"] == (QR_Field_Monitoring_System.Models.Enums.FieldTaskStatus)val;
+                    if (isSelected)
+                    {
+                        <option value="@val" selected="selected">@val</option>
+                    }
+                    else
+                    {
+                        <option value="@val">@val</option>
+                    }
+                }
             </select>
         </div>
         <div class="col-12 col-sm-6 col-md-3">
             <label class="form-label small fw-bold text-dark">Priority</label>
-            <select class="form-control-mono">
+            <select name="priority" class="form-control-mono" onchange="this.form.submit()">
                 <option value="">All Priorities</option>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+                @foreach (var val in Enum.GetValues(typeof(QR_Field_Monitoring_System.Models.Enums.PriorityLevel)))
+                {
+                    var isSelected = (QR_Field_Monitoring_System.Models.Enums.PriorityLevel?)ViewData["PriorityFilter"] == (QR_Field_Monitoring_System.Models.Enums.PriorityLevel)val;
+                    if (isSelected)
+                    {
+                        <option value="@val" selected="selected">@val</option>
+                    }
+                    else
+                    {
+                        <option value="@val">@val</option>
+                    }
+                }
             </select>
         </div>
         <div class="col-12 col-md-1 d-flex align-items-end">
-            <button class="btn btn-mono-outline w-100 py-2" title="Reset Filters">
+            <a class="btn btn-mono-outline w-100 py-2" asp-action="Index" title="Reset Filters">
                 <i class="bi bi-arrow-counterclockwise"></i>
-            </button>
+            </a>
         </div>
-    </div>
+    </form>
 </div>
 
 <!-- Datatable Card -->
@@ -61,36 +80,68 @@
                     <th>Assigned Worker</th>
                     <th>Priority</th>
                     <th>Status</th>
-                    <th>Last Scan</th>
+                    <th>Due Date</th>
                     <th class="text-end">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td class="fw-bold">#TSK-1092</td>
-                    <td class="fw-medium">Site Inspections (Building A)</td>
-                    <td>John Doe</td>
-                    <td><span class="badge-mono">Medium</span></td>
-                    <td><span class="badge-mono-dark">Scanned</span></td>
-                    <td class="text-muted small">2026-07-04 03:12</td>
-                    <td class="text-end">
-                        <button class="btn btn-sm btn-mono-outline me-1" title="Generate QR"><i class="bi bi-qr-code"></i></button>
-                        <button class="btn btn-sm btn-mono" title="Edit"><i class="bi bi-pencil"></i></button>
-                    </td>
-                </tr>
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">No tasks found matching the criteria.</td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var task in Model)
+                    {
+                        <tr>
+                            <td class="fw-bold">#@task.Id</td>
+                            <td class="fw-medium">@task.Title</td>
+                            <td>@(task.AssignedWorker?.FullName ?? task.AssignedWorker?.UserName ?? "Unassigned")</td>
+                            <td>
+                                @if (task.Priority == QR_Field_Monitoring_System.Models.Enums.PriorityLevel.High)
+                                {
+                                    <span class="badge bg-dark text-white">High</span>
+                                }
+                                else if (task.Priority == QR_Field_Monitoring_System.Models.Enums.PriorityLevel.Medium)
+                                {
+                                    <span class="badge-mono">Medium</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-mono text-muted">Low</span>
+                                }
+                            </td>
+                            <td>
+                                @if (task.Status == QR_Field_Monitoring_System.Models.Enums.FieldTaskStatus.Completed)
+                                {
+                                    <span class="badge-mono-dark">Completed</span>
+                                }
+                                else if (task.Status == QR_Field_Monitoring_System.Models.Enums.FieldTaskStatus.InProgress)
+                                {
+                                    <span class="badge-mono">In Progress</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-mono text-muted">Pending</span>
+                                }
+                            </td>
+                            <td class="text-muted small">@task.DueDate.ToString("yyyy-MM-dd")</td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-mono-outline me-1" asp-action="Details" asp-route-id="@task.Id" title="View Details"><i class="bi bi-eye"></i></a>
+                                <a class="btn btn-sm btn-mono-outline me-1" asp-action="Edit" asp-route-id="@task.Id" title="Edit"><i class="bi bi-pencil"></i></a>
+                                <a class="btn btn-sm btn-mono" asp-action="Delete" asp-route-id="@task.Id" title="Delete"><i class="bi bi-trash"></i></a>
+                            </td>
+                        </tr>
+                    }
+                }
             </tbody>
         </table>
     </div>
 
-    <!-- Pagination -->
+    <!-- Results count -->
     <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top border-light">
-        <span class="small text-muted">Showing 1 of 1 tasks</span>
-        <nav aria-label="Page navigation">
-            <ul class="pagination pagination-sm mb-0">
-                <li class="page-item disabled"><a class="page-link border-light text-dark bg-white" href="#">Previous</a></li>
-                <li class="page-item active"><a class="page-link border-dark bg-dark text-white" href="#">1</a></li>
-                <li class="page-item disabled"><a class="page-link border-light text-dark bg-white" href="#">Next</a></li>
-            </ul>
-        </nav>
+        <span class="small text-muted">Showing @Model.Count() tasks</span>
     </div>
 </div>

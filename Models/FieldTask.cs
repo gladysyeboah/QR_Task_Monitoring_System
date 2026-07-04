@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using QR_Field_Monitoring_System.Models.Enums;
 
 namespace QR_Field_Monitoring_System.Models
@@ -28,6 +28,10 @@ namespace QR_Field_Monitoring_System.Models
         public FieldTaskStatus Status { get; set; } = FieldTaskStatus.Pending;
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+        // Assigned Worker Relation
+        public string? AssignedWorkerId { get; set; }
+        public ApplicationUser? AssignedWorker { get; set; }
 
         // Navigation Property
         public ICollection<Submission> Submissions { get; set; } = new List<Submission>();

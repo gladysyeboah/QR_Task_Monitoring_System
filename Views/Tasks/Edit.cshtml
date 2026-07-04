@@ -1,0 +1,103 @@
+@model QR_Field_Monitoring_System.Models.FieldTask
+@{
+    ViewData["Title"] = "Edit Task";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-0 text-dark fw-bold">Edit Task</h1>
+        <p class="text-muted mb-0">Modify task attributes, status, and reassignment.</p>
+    </div>
+    <div>
+        <a class="btn btn-mono-outline" asp-action="Index">
+            <i class="bi bi-arrow-left me-2"></i> Back to Tasks
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 col-lg-8">
+        <div class="card-mono">
+            <form asp-action="Edit" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <input type="hidden" asp-for="Id" />
+
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label small fw-bold text-dark">Task Title</label>
+                    <input asp-for="Title" class="form-control-mono" />
+                    <span asp-validation-for="Title" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label small fw-bold text-dark">Description</label>
+                    <textarea asp-for="Description" rows="4" class="form-control-mono"></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-6">
+                        <label asp-for="AssetName" class="form-label small fw-bold text-dark">Asset Name</label>
+                        <input asp-for="AssetName" class="form-control-mono" />
+                        <span asp-validation-for="AssetName" class="text-danger small"></span>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <label asp-for="Location" class="form-label small fw-bold text-dark">Location / Site</label>
+                        <input asp-for="Location" class="form-control-mono" />
+                        <span asp-validation-for="Location" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-12 col-md-3">
+                        <label asp-for="Priority" class="form-label small fw-bold text-dark">Priority</label>
+                        <select asp-for="Priority" class="form-control-mono">
+                            @foreach (var val in Enum.GetValues(typeof(QR_Field_Monitoring_System.Models.Enums.PriorityLevel)))
+                            {
+                                <option value="@val">@val</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Priority" class="text-danger small"></span>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label asp-for="Status" class="form-label small fw-bold text-dark">Status</label>
+                        <select asp-for="Status" class="form-control-mono">
+                            @foreach (var val in Enum.GetValues(typeof(QR_Field_Monitoring_System.Models.Enums.FieldTaskStatus)))
+                            {
+                                <option value="@val">@val</option>
+                            }
+                        </select>
+                        <span asp-validation-for="Status" class="text-danger small"></span>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label asp-for="DueDate" class="form-label small fw-bold text-dark">Due Date</label>
+                        <input asp-for="DueDate" type="datetime-local" class="form-control-mono" value="@Model.DueDate.ToString("yyyy-MM-ddTHH:mm")" />
+                        <span asp-validation-for="DueDate" class="text-danger small"></span>
+                    </div>
+                    <div class="col-12 col-md-3">
+                        <label asp-for="AssignedWorkerId" class="form-label small fw-bold text-dark">Assign Worker</label>
+                        <select asp-for="AssignedWorkerId" class="form-control-mono">
+                            <option value="">-- Select Worker --</option>
+                            @if (ViewBag.Workers != null)
+                            {
+                                @foreach (var worker in (IEnumerable<QR_Field_Monitoring_System.Models.ApplicationUser>)ViewBag.Workers)
+                                {
+                                    <option value="@worker.Id">@(string.IsNullOrWhiteSpace(worker.FullName) ? worker.UserName : worker.FullName)</option>
+                                }
+                            }
+                        </select>
+                        <span asp-validation-for="AssignedWorkerId" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a class="btn btn-mono-outline" asp-action="Index">Cancel</a>
+                    <button type="submit" class="btn btn-mono">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
