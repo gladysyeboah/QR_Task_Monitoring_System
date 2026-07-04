@@ -1,20 +1,4 @@
-// QR Field Monitoring System - Professional UI Navigation Interaction
-document.addEventListener("DOMContentLoaded", function () {
-    const sidebarToggle = document.getElementById("sidebarToggle");
-    const appWrapper = document.getElementById("app-wrapper");
-    const backdrop = document.getElementById("sidebarBackdrop");
+// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
+// for details on configuring this project to bundle and minify static web assets.
 
-    if (sidebarToggle && appWrapper) {
-        sidebarToggle.addEventListener("click", function () {
-            appWrapper.classList.toggle("sidebar-open");
-            appWrapper.classList.toggle("sidebar-collapsed");
-        });
-    }
-
-    // Dismiss sidebar when clicking outside on mobile devices
-    if (backdrop && appWrapper) {
-        backdrop.addEventListener("click", function () {
-            appWrapper.classList.remove("sidebar-open");
-        });
-    }
-});
+// Write your JavaScript code.
