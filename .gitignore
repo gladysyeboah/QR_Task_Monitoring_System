@@ -1,0 +1,31 @@
+## Visual Studio & .NET Build Output
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Re]leases/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+[Log]/
+
+## User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+*.Backup.tmp
+
+## Visual Studio cache/options directory
+.vs/
+
+## SQLite databases
+*.db
+*.db-shm
+*.db-wal
+
+## Logs and backups
+*.log
