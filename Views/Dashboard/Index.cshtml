@@ -1,3 +1,4 @@
+@model QR_Field_Monitoring_System.ViewModels.DashboardViewModel
 @{
     ViewData["Title"] = "Dashboard";
 }
@@ -8,7 +9,7 @@
         <p class="text-muted mb-0">Real-time status of tasks and workers in the field.</p>
     </div>
     <div>
-        <button class="btn btn-mono">
+        <button class="btn btn-mono" onclick="window.location.reload();">
             <i class="bi bi-arrow-repeat me-2"></i> Refresh Data
         </button>
     </div>
@@ -23,7 +24,7 @@
             </div>
             <div>
                 <span class="d-block text-muted small fw-medium">Total Tasks</span>
-                <span class="h3 mb-0 fw-bold">1</span>
+                <span class="h3 mb-0 fw-bold">@Model.TotalTasks</span>
             </div>
         </div>
     </div>
@@ -34,7 +35,7 @@
             </div>
             <div>
                 <span class="d-block text-muted small fw-medium">Pending Tasks</span>
-                <span class="h3 mb-0 fw-bold">0</span>
+                <span class="h3 mb-0 fw-bold">@Model.PendingTasks</span>
             </div>
         </div>
     </div>
@@ -45,7 +46,7 @@
             </div>
             <div>
                 <span class="d-block text-muted small fw-medium">Completed Tasks</span>
-                <span class="h3 mb-0 fw-bold">1</span>
+                <span class="h3 mb-0 fw-bold">@Model.CompletedTasks</span>
             </div>
         </div>
     </div>
@@ -56,7 +57,7 @@
             </div>
             <div>
                 <span class="d-block text-muted small fw-medium">Active Workers</span>
-                <span class="h3 mb-0 fw-bold">1 / 1</span>
+                <span class="h3 mb-0 fw-bold">@Model.ActiveWorkersCount / @Model.TotalWorkersCount</span>
             </div>
         </div>
     </div>
@@ -77,58 +78,95 @@
                         <tr>
                             <th>Task</th>
                             <th>Worker</th>
-                            <th>Status</th>
+                            <th>Condition</th>
                             <th>Timestamp</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td class="fw-medium">Site Inspections (Building A)</td>
-                            <td>John Doe</td>
-                            <td><span class="badge-mono-dark">Scanned</span></td>
-                            <td class="text-muted small">03:12 AM</td>
-                        </tr>
+                        @if (!Model.LatestSubmissions.Any())
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-muted">No recent submissions found.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            @foreach (var submission in Model.LatestSubmissions)
+                            {
+                                <tr>
+                                    <td class="fw-medium">@(submission.FieldTask?.Title ?? "N/A")</td>
+                                    <td>@(Model.WorkerNames.TryGetValue(submission.WorkerId, out var workerName) ? workerName : "Unknown")</td>
+                                    <td>
+                                        @if (submission.Condition == QR_Field_Monitoring_System.Models.Enums.ConditionStatus.Good)
+                                        {
+                                            <span class="badge-mono-dark">Good</span>
+                                        }
+                                        else if (submission.Condition == QR_Field_Monitoring_System.Models.Enums.ConditionStatus.Fair)
+                                        {
+                                            <span class="badge-mono">Fair</span>
+                                        }
+                                        else if (submission.Condition == QR_Field_Monitoring_System.Models.Enums.ConditionStatus.Faulty)
+                                        {
+                                            <span class="badge bg-dark text-white">Faulty</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-dark text-white">Damaged</span>
+                                        }
+                                    </td>
+                                    <td class="text-muted small">@submission.SubmittedAt.ToString("g")</td>
+                                </tr>
+                            }
+                        }
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    <!-- Active Field Alerts -->
+    <!-- Right Column: Recently Created Tasks & Quick Actions -->
     <div class="col-12 col-lg-4">
-        <div class="card-mono h-100 d-flex flex-column">
-            <h5 class="fw-bold mb-3 text-dark">Quick Stats Summary</h5>
-            <div class="flex-grow-1 d-flex flex-column justify-content-center">
-                <div class="mb-4">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span class="text-muted small fw-medium">Overall Progress</span>
-                        <span class="text-dark small fw-bold">66%</span>
-                    </div>
-                    <div class="progress bg-light" style="height: 8px; border: 1px solid var(--border-color);">
-                        <div class="progress-bar bg-dark" role="progressbar" style="width: 66%;" aria-valuenow="66" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span class="text-muted small fw-medium">Active Worker Utilization</span>
-                        <span class="text-dark small fw-bold">80%</span>
-                    </div>
-                    <div class="progress bg-light" style="height: 8px; border: 1px solid var(--border-color);">
-                        <div class="progress-bar bg-dark" role="progressbar" style="width: 80%;" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                </div>
-
-                <div class="mb-2">
-                    <div class="d-flex justify-content-between mb-1">
-                        <span class="text-muted small fw-medium">QR Scanning Efficiency</span>
-                        <span class="text-dark small fw-bold">95%</span>
-                    </div>
-                    <div class="progress bg-light" style="height: 8px; border: 1px solid var(--border-color);">
-                        <div class="progress-bar bg-dark" role="progressbar" style="width: 95%;" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                </div>
+        <!-- Quick Actions Card -->
+        <div class="card-mono mb-4">
+            <h5 class="fw-bold mb-3 text-dark">Quick Actions</h5>
+            <div class="d-grid gap-2">
+                <a class="btn btn-mono text-start d-flex justify-content-between align-items-center" asp-controller="Tasks" asp-action="Index">
+                    <span>Create Task</span>
+                    <i class="bi bi-plus-lg"></i>
+                </a>
+                <a class="btn btn-mono-outline text-start d-flex justify-content-between align-items-center" asp-controller="Tasks" asp-action="Index">
+                    <span>Generate QR Codes</span>
+                    <i class="bi bi-qr-code"></i>
+                </a>
+                <a class="btn btn-mono-outline text-start d-flex justify-content-between align-items-center" asp-controller="Reports" asp-action="Index">
+                    <span>View Analytics</span>
+                    <i class="bi bi-bar-chart-line"></i>
+                </a>
             </div>
+        </div>
+
+        <!-- Recently Created Tasks Card -->
+        <div class="card-mono">
+            <h5 class="fw-bold mb-3 text-dark">Recently Created Tasks</h5>
+            @if (!Model.RecentTasks.Any())
+            {
+                <p class="text-muted small mb-0">No tasks created yet.</p>
+            }
+            else
+            {
+                <div class="list-group list-group-flush">
+                    @foreach (var task in Model.RecentTasks)
+                    {
+                        <div class="list-group-item bg-transparent px-0 py-2 border-bottom d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-0 fw-semibold text-dark small">@task.Title</h6>
+                                <small class="text-muted">Due: @task.DueDate.ToString("d")</small>
+                            </div>
+                            <span class="badge-mono">@task.Status</span>
+                        </div>
+                    }
+                </div>
+            }
         </div>
     </div>
 </div>
